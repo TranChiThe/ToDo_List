@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.todolist.domain.model.Task
 import com.example.todolist.domain.use_cases.TaskUseCases
 import com.example.todolist.presentation.util.AddEditTaskEvent
+import com.example.todolist.presentation.util.TaskEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -91,6 +92,13 @@ class AddEditTaskViewModel @Inject constructor(
                 _startTime.value = it.startTime
                 _endTime.value = it.endTime
             }
+        }
+    }
+
+    fun deleteTaskById(id: Long) {
+        viewModelScope.launch {
+            taskUseCases.deleteTaskById(id)
+            TaskEventBus.sendEvent()
         }
     }
 }

@@ -113,6 +113,7 @@ fun HomeScreen(
                                     task = task,
                                     modifier = Modifier,
                                     onClick = {
+                                        navController.navigate(Screen.EditTask.createRoute(task.id))
                                     },
                                     onFavorite = {
                                     },

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -93,6 +94,9 @@ fun AddEditTaskScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var taskViewMode: TaskViewModel = hiltViewModel()
+    var showDialog by remember { mutableStateOf(false) }
+
+
 
     LaunchedEffect(taskId) {
         if (taskId != null) {
@@ -166,6 +170,10 @@ fun AddEditTaskScreen(
                 isFavorite = favorite,
                 onFavorite = { viewModel.onEvent(AddEditTaskEvent.ToggleFavorite) },
                 onDelete = {
+                    taskId?.let {
+                        viewModel.deleteTaskById(it)
+                        navController.popBackStack()
+                    }
                 },
             )
 
