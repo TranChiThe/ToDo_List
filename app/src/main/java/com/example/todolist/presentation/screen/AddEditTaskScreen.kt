@@ -56,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.todolist.presentation.navigation.AppTopBar
 import com.example.todolist.presentation.util.AddEditTaskEvent
+import com.example.todolist.presentation.util.LoadingOverlay
 import com.example.todolist.presentation.view_model.AddEditTaskViewModel
 import com.example.todolist.presentation.view_model.TaskViewModel
 import kotlinx.coroutines.delay
@@ -94,9 +95,6 @@ fun AddEditTaskScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     var taskViewMode: TaskViewModel = hiltViewModel()
-    var showDialog by remember { mutableStateOf(false) }
-
-
 
     LaunchedEffect(taskId) {
         if (taskId != null) {
@@ -127,6 +125,7 @@ fun AddEditTaskScreen(
             )
         }
     ) { innerPadding ->
+        LoadingOverlay(isLoading = isLoading)
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -164,8 +163,8 @@ fun AddEditTaskScreen(
                         delay(2000)
                         viewModel.onEvent(AddEditTaskEvent.saveTask)
                         isLoading = false
-                        navController.popBackStack()
                     }
+                    navController.popBackStack()
                 },
                 isFavorite = favorite,
                 onFavorite = { viewModel.onEvent(AddEditTaskEvent.ToggleFavorite) },
@@ -313,6 +312,7 @@ fun TaskInputSection(
     onSave: () -> Unit,
     onCancel: () -> Unit
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -344,13 +344,35 @@ fun TaskInputSection(
                         )
                     }
 
-                    IconButton(onClick = onDelete) {
+                    IconButton(onClick = { showDeleteDialog = true }) {
                         Icon(
-                            imageVector = Icons.Default.Delete,
+                            Icons.Default.Delete,
                             contentDescription = "Delete Task",
                             tint = Color.Red
                         )
                     }
+
+                    if (showDeleteDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showDeleteDialog = false },
+                            title = { Text("Confirm deletion") },
+                            text = { Text("Are you sure you want to delete this task?") },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    showDeleteDialog = false
+                                    onDelete()
+                                }) {
+                                    Text("Delete", color = Color.Red)
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showDeleteDialog = false }) {
+                                    Text("Cancel")
+                                }
+                            }
+                        )
+                    }
+
                 }
             }
             OutlinedTextField(
