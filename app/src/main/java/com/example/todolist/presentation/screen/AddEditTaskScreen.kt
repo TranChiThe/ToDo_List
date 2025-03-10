@@ -129,8 +129,7 @@ fun AddEditTaskScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
+                .padding(innerPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Phần chọn thời gian
@@ -242,7 +241,7 @@ fun TimeSelectionSection(
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(12.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -321,7 +320,7 @@ fun TaskInputSection(
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
+                .padding(10.dp)
                 .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
