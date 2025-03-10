@@ -179,6 +179,10 @@ fun TaskItem(
                 IconButton(
                     onClick = {
                         isFavorite = !isFavorite
+                        task.favorite = isFavorite
+                        coroutineScope.launch {
+                            onFavorite()
+                        }
                     },
                     modifier = Modifier.size(36.dp)
                 ) {
