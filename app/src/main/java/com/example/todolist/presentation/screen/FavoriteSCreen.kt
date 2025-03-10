@@ -110,7 +110,9 @@ fun FavoriteScreen(
                                     onFavorite = {
                                         taskViewModel.onEvent(TaskEvent.UpdateTask(task))
                                     },
-                                    onCheckBox = { }
+                                    onCheckBox = {
+                                        taskViewModel.onEvent(TaskEvent.UpdateTask(task))
+                                    }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                             }

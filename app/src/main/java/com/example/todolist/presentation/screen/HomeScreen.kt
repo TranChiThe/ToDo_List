@@ -122,7 +122,9 @@ fun HomeScreen(
                                         taskViewModel.onEvent(TaskEvent.UpdateTask(task))
                                         Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
                                     },
-                                    onCheckBox = { }
+                                    onCheckBox = {
+                                        taskViewModel.onEvent(TaskEvent.UpdateTask(task))
+                                    }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                             }

@@ -157,10 +157,18 @@ fun TaskItem(
                             ),
                             modifier = Modifier.padding(top = 2.dp)
                         )
-
-
+                        if (isExpired) {
+                            Text(
+                                text = "Expired",
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Red
+                                ),
+                                modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                            )
+                        }
                     }
-
                 }
             }
             Column(
