@@ -1,4 +1,10 @@
 package com.example.todolist.domain.use_cases
 
-class AddTask {
+import com.example.todolist.domain.model.Task
+import com.example.todolist.domain.repositories.TaskRepository
+
+class AddTask(
+    private val taskRepository: TaskRepository
+) {
+    suspend operator fun invoke(task: Task) = taskRepository.addTask(task)
 }
