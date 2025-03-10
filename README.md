@@ -37,7 +37,7 @@
 
 Mở dự án bằng Android Studio.
 
-Đồng bộ dependencies.
+Đồng bộ dependencies (Vào File → Sync Project with Gradle Files.).
 
 Chạy ứng dụng trên thiết bị ảo hoặc thật.
 
