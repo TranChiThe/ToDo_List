@@ -59,6 +59,7 @@ import com.example.todolist.presentation.util.AddEditTaskEvent
 import com.example.todolist.presentation.util.LoadingOverlay
 import com.example.todolist.presentation.view_model.AddEditTaskViewModel
 import com.example.todolist.presentation.view_model.TaskViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -157,12 +158,12 @@ fun AddEditTaskScreen(
                     navController.popBackStack()
                 },
                 onSave = {
-                    coroutineScope.launch {
+                    coroutineScope.launch (Dispatchers.IO){
                         isLoading = true
                         delay(2000)
-                        viewModel.onEvent(AddEditTaskEvent.saveTask)
-                        isLoading = false
                     }
+                    viewModel.onEvent(AddEditTaskEvent.saveTask)
+                    isLoading = false
                     navController.popBackStack()
                 },
                 isFavorite = favorite,
