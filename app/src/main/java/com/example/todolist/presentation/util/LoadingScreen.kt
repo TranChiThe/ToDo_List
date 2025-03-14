@@ -20,22 +20,23 @@ import androidx.compose.ui.zIndex
 fun LoadingOverlay(isLoading: Boolean) {
     if (isLoading) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .zIndex(1f)
-                .background(Color.Black.copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .zIndex(1f)
+                    .background(Color.Black.copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 CircularProgressIndicator(
                     color = Color.White,
-                    strokeWidth = 4.dp
+                    strokeWidth = 4.dp,
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "Loading...",
                     color = Color.White,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
                 )
             }
         }

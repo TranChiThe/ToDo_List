@@ -39,7 +39,7 @@ import com.example.todolist.presentation.view_model.TaskViewModel
 fun FavoriteScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    taskViewModel: TaskViewModel = hiltViewModel()
+    taskViewModel: TaskViewModel = hiltViewModel(),
 ) {
     val tasks by taskViewModel.taskFlow.collectAsState(initial = emptyList())
     LaunchedEffect(Unit) {
@@ -47,39 +47,35 @@ fun FavoriteScreen(
     }
     AppScaffold(
         navController = navController,
-        showFab = true // Hiển thị FAB
+        showFab = true, // Hiển thị FAB
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 30.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize().padding(top = 30.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = "Task Favorite",
                 fontSize = 30.sp,
-                fontWeight = FontWeight(300)
+                fontWeight = FontWeight(300),
             )
             if (tasks.isEmpty()) {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
+                    modifier = Modifier.fillMaxSize().padding(16.dp),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = null,
                             tint = Color.Gray,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(48.dp),
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "No task",
                             fontSize = 20.sp,
                             color = Color.Gray,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                 }
@@ -87,7 +83,7 @@ fun FavoriteScreen(
                 val groupedTasks = groupTasksByDate(tasks)
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp)
+                    contentPadding = PaddingValues(16.dp),
                 ) {
                     val orderedKeys = listOf("Today", "Yesterday", "One week ago", "Older")
                     orderedKeys.forEach { key ->
@@ -97,23 +93,17 @@ fun FavoriteScreen(
                                     text = key,
                                     fontSize = 20.sp,
                                     fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(bottom = 8.dp)
+                                    modifier = Modifier.padding(bottom = 8.dp),
                                 )
                             }
                             items(taskList, key = { it.id }) { task ->
-                                TaskItem(
-                                    task = task,
-                                    modifier = Modifier,
-                                    onClick = {
-                                        navController.navigate(Screen.EditTask.createRoute(task.id))
-                                    },
-                                    onFavorite = {
-                                        taskViewModel.onEvent(TaskEvent.UpdateTask(task))
-                                    },
-                                    onCheckBox = {
-                                        taskViewModel.onEvent(TaskEvent.UpdateTask(task))
-                                    }
-                                )
+                                TaskItem(task = task, modifier = Modifier, onClick = {
+                                    navController.navigate(Screen.EditTask.createRoute(task.id))
+                                }, onFavorite = {
+                                    taskViewModel.onEvent(TaskEvent.UpdateTask(task))
+                                }, onCheckBox = {
+                                    taskViewModel.onEvent(TaskEvent.UpdateTask(task))
+                                })
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                         }

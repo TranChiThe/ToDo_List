@@ -29,9 +29,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideBoxStore(@ApplicationContext context: Context): BoxStore {
-        return MyObjectBox.builder()
-            .androidContext(context)
-            .build()
+        return MyObjectBox.builder().androidContext(context).build()
     }
 
     @Provides

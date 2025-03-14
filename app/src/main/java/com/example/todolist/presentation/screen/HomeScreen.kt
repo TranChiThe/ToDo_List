@@ -15,19 +15,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,24 +37,23 @@ import com.example.todolist.presentation.task.TaskItem
 import com.example.todolist.presentation.util.AppScaffold
 import com.example.todolist.presentation.view_model.TaskEvent
 import com.example.todolist.presentation.view_model.TaskViewModel
-import java.util.*
+import java.util.Calendar
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     taskViewModel: TaskViewModel = hiltViewModel(),
-    navController: NavHostController
+    navController: NavHostController,
 ) {
     val tasks by taskViewModel.taskFlow.collectAsState(initial = emptyList())
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
-        taskViewModel.getFavoriteTask(false)
+        taskViewModel.loadTasks()
     }
     AppScaffold(
-        navController = navController,
-        showFab = true // Hiển thị FAB
+        navController = navController, showFab = true // Hiển thị FAB
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -71,9 +63,7 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Task List",
-                fontSize = 30.sp,
-                fontWeight = FontWeight(300)
+                text = "Task List", fontSize = 30.sp, fontWeight = FontWeight(300)
             )
             if (tasks.isEmpty()) {
                 Box(
@@ -101,8 +91,7 @@ fun HomeScreen(
             } else {
                 val groupedTasks = groupTasksByDate(tasks)
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp)
+                    modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(16.dp)
                 ) {
                     val orderedKeys = listOf("Today", "Yesterday", "One week ago", "Older")
                     orderedKeys.forEach { key ->
@@ -116,20 +105,16 @@ fun HomeScreen(
                                 )
                             }
                             items(taskList) { task ->
-                                TaskItem(
-                                    task = task,
-                                    modifier = Modifier,
-                                    onClick = {
-                                        navController.navigate(Screen.EditTask.createRoute(task.id))
-                                    },
-                                    onFavorite = {
-                                        taskViewModel.onEvent(TaskEvent.UpdateTask(task))
-                                        Toast.makeText(context, "Added to favorites", Toast.LENGTH_SHORT).show()
-                                    },
-                                    onCheckBox = {
-                                        taskViewModel.onEvent(TaskEvent.UpdateTask(task))
-                                    }
-                                )
+                                TaskItem(task = task, modifier = Modifier, onClick = {
+                                    navController.navigate(Screen.EditTask.createRoute(task.id))
+                                }, onFavorite = {
+                                    taskViewModel.onEvent(TaskEvent.UpdateTask(task))
+                                    Toast.makeText(
+                                        context, "Added to favorites", Toast.LENGTH_SHORT
+                                    ).show()
+                                }, onCheckBox = {
+                                    taskViewModel.onEvent(TaskEvent.UpdateTask(task))
+                                })
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
@@ -178,6 +163,3 @@ fun groupTasksByDate(tasks: List<Task>): Map<String, List<Task>> {
         entry.value.sortedByDescending { it.createdAt }
     }
 }
-
-
-

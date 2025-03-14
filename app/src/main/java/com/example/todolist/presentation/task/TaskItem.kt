@@ -52,7 +52,7 @@ fun TaskItem(
     modifier: Modifier = Modifier,
     onFavorite: () -> Unit,
     onCheckBox: () -> Unit,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     var isChecked by remember { mutableStateOf(task.status == "Done") }
     val maxLength = 18
@@ -91,20 +91,17 @@ fun TaskItem(
         ) {
             // Checkbox và Title
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
+                verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)
             ) {
                 Column {
                     Checkbox(
-                        checked = isChecked,
-                        onCheckedChange = {
+                        checked = isChecked, onCheckedChange = {
                             isChecked = it
                             val newStatus = if (isChecked) "Done" else "Pending"
                             task.status = newStatus
                             task.updateAt = System.currentTimeMillis()
                             onCheckBox()
-                        },
-                        colors = CheckboxDefaults.colors(
+                        }, colors = CheckboxDefaults.colors(
                             checkedColor = MaterialTheme.colorScheme.primary,
                             uncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
@@ -152,20 +149,17 @@ fun TaskItem(
                         Text(
                             text = formatTimestamp(task.endTime),
                             style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 12.sp,
-                                color = if (isExpired) Color.Red else Color.Gray
+                                fontSize = 12.sp, color = if (isExpired) Color.Red else Color.Gray
                             ),
                             modifier = Modifier.padding(top = 2.dp)
                         )
                         if (isExpired) {
                             Text(
-                                text = "Expired",
-                                style = MaterialTheme.typography.bodySmall.copy(
+                                text = "Expired", style = MaterialTheme.typography.bodySmall.copy(
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.Red
-                                ),
-                                modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                                ), modifier = Modifier.padding(start = 4.dp, top = 2.dp)
                             )
                         }
                     }
@@ -191,8 +185,7 @@ fun TaskItem(
                         coroutineScope.launch {
                             onFavorite()
                         }
-                    },
-                    modifier = Modifier.size(36.dp)
+                    }, modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
                         imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,

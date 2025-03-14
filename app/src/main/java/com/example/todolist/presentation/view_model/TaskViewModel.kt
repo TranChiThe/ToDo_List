@@ -14,71 +14,74 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TaskViewModel @Inject constructor(
-    private val taskUseCases: TaskUseCases
-) : ViewModel() {
-    private val _taskFlow = MutableStateFlow<List<Task>>(emptyList())
-    val taskFlow: StateFlow<List<Task>> = _taskFlow
+class TaskViewModel
+    @Inject
+    constructor(
+        private val taskUseCases: TaskUseCases,
+    ) : ViewModel() {
+        private val _taskFlow = MutableStateFlow<List<Task>>(emptyList())
+        val taskFlow: StateFlow<List<Task>> = _taskFlow
 
-    private val _favoriteTasksFlow = MutableStateFlow<List<Task>>(emptyList())
-    val favoriteTasksFlow: StateFlow<List<Task>> = _favoriteTasksFlow
-    private var job: Job? = null
-    private var deleteTask: Task? = null
+        private val _favoriteTasksFlow = MutableStateFlow<List<Task>>(emptyList())
+        val favoriteTasksFlow: StateFlow<List<Task>> = _favoriteTasksFlow
+        private var job: Job? = null
+        private var deleteTask: Task? = null
 
-    init {
-        loadTasks()
-        observeTaskEvents()
-    }
-
-    private fun observeTaskEvents() {
-        viewModelScope.launch {
-            TaskEventBus.eventFlow.collect {
-                loadTasks()
-            }
+        init {
+            loadTasks()
+            observeTaskEvents()
         }
-    }
 
-    fun loadTasks() {
-        job?.cancel()
-        job = viewModelScope.launch {
-            taskUseCases.getAllTask().collect { tasks ->
-                _taskFlow.value = tasks
-            }
-        }
-    }
-
-    fun getFavoriteTask(isFavorite: Boolean) {
-        job?.cancel()
-        job = viewModelScope.launch {
-            taskUseCases.getFavoriteTask(isFavorite).collect { tasks ->
-                _taskFlow.value = tasks
-            }
-        }
-    }
-
-    fun onEvent(event: TaskEvent) {
-        when (event) {
-            is TaskEvent.DeleteTask -> {
-                viewModelScope.launch {
-                    taskUseCases.deleteTask(event.task)
+        private fun observeTaskEvents() {
+            viewModelScope.launch {
+                TaskEventBus.eventFlow.collect {
                     loadTasks()
-
-                }
-                deleteTask = event.task
-            }
-
-            is TaskEvent.UpdateTask -> {
-                viewModelScope.launch {
-                    delay(500)
-                    taskUseCases.updateTask(event.task)
                 }
             }
+        }
 
-            is TaskEvent.RestoreTask -> {
+        fun loadTasks() {
+            job?.cancel()
+            job =
                 viewModelScope.launch {
-                    taskUseCases.addTask(deleteTask!!)
+                    taskUseCases.getAllTask().collect { tasks ->
+                        _taskFlow.value = tasks
+                    }
+                }
+        }
+
+        fun getFavoriteTask(isFavorite: Boolean) {
+            job?.cancel()
+            job =
+                viewModelScope.launch {
+                    taskUseCases.getFavoriteTask(isFavorite).collect { tasks ->
+                        _taskFlow.value = tasks
+                    }
+                }
+        }
+
+        fun onEvent(event: TaskEvent) {
+            when (event) {
+                is TaskEvent.DeleteTask -> {
+                    viewModelScope.launch {
+                        taskUseCases.deleteTask(event.task)
+                        loadTasks()
+                    }
+                    deleteTask = event.task
+                }
+
+                is TaskEvent.UpdateTask -> {
+                    viewModelScope.launch {
+                        delay(500)
+                        taskUseCases.updateTask(event.task)
+                    }
+                }
+
+                is TaskEvent.RestoreTask -> {
+                    viewModelScope.launch {
+                        taskUseCases.addTask(deleteTask!!)
+                    }
                 }
             }
         }
     }
-}

@@ -25,13 +25,10 @@ import com.example.todolist.presentation.screen.SearchScreen
 fun Navigation() {
     val navController = rememberNavController()
 
-    Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
-    ) { innerPadding ->
-        NavHost(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
+    Scaffold(bottomBar = { BottomNavigationBar(navController) }) { innerPadding ->
+        NavHost(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
             navController = navController,
             startDestination = "home",
             enterTransition = {
@@ -57,8 +54,7 @@ fun Navigation() {
                     targetOffsetX = { fullWidth -> fullWidth }, // Slide ra bên phải khi quay lại
                     animationSpec = tween(durationMillis = 300)
                 )
-            }
-        ) {
+            }) {
             composable(Screen.Home.route) { HomeScreen(navController = navController) }
             composable(Screen.Search.route) { SearchScreen(navController = navController) }
             composable(Screen.Calendar.route) { CalendarScreen(navController = navController) }
@@ -76,7 +72,4 @@ fun Navigation() {
         }
     }
 }
-
-
-
 

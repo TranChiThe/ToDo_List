@@ -35,35 +35,27 @@ import com.example.todolist.presentation.navigation.Screen
 fun AppScaffold(
     navController: NavHostController,
     showFab: Boolean = true,
-    content: @Composable (PaddingValues) -> Unit
+    content: @Composable (PaddingValues) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        floatingActionButton = {
-            if (showFab) {
-                FloatingActionButton(
-                    onClick = { navController.navigate(Screen.AddTask.route) },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    content = {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add Task",
-                            tint = Color.White,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-                )
-            }
-        },
-        floatingActionButtonPosition = FabPosition.End,
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) { data ->
-                CustomSnackbar(data)
-            }
+    Scaffold(modifier = Modifier.fillMaxSize(), floatingActionButton = {
+        if (showFab) {
+            FloatingActionButton(onClick = { navController.navigate(Screen.AddTask.route) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                content = {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add Task",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                    )
+                })
         }
-    ) { paddingValues ->
+    }, floatingActionButtonPosition = FabPosition.End, snackbarHost = {
+        SnackbarHost(hostState = snackbarHostState) { data ->
+            CustomSnackbar(data)
+        }
+    }) { paddingValues ->
         content(paddingValues)
     }
 }
@@ -87,8 +79,7 @@ fun CustomSnackbar(data: SnackbarData) {
                         Text("Cancel", color = Color.White)
                     }
                 }
-            },
-            modifier = Modifier.padding(16.dp)
+            }, modifier = Modifier.padding(16.dp)
         ) {
             Text(data.visuals.message)
         }

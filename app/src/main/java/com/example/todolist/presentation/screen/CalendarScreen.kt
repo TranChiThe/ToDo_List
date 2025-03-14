@@ -38,97 +38,97 @@ import java.time.Instant.ofEpochMilli
 import java.time.LocalDate
 import java.time.ZoneId
 
+@Suppress("ktlint:standard:function-naming")
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
     taskViewModel: TaskViewModel = hiltViewModel(),
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val tasks by taskViewModel.taskFlow.collectAsState(initial = emptyList())
 
     // Get future task time
-    val taskDates = tasks
-        .filter { it.startTime > System.currentTimeMillis() }
-        .map { it.startTime.toLocalDate() }
-        .distinct()
+    val taskDates =
+        tasks
+            .filter { it.startTime > System.currentTimeMillis() }
+            .map { it.startTime.toLocalDate() }
+            .distinct()
 
-    val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = System.currentTimeMillis(),
-        yearRange = 2000..2030,
-    )
+    val datePickerState =
+        rememberDatePickerState(
+            initialSelectedDateMillis = System.currentTimeMillis(),
+            yearRange = 2000..2030,
+        )
     val selectedDate = datePickerState.selectedDateMillis?.toLocalDate()
-    val tasksForSelectedDay = if (selectedDate != null) {
-        tasks.filter { task ->
-            task.startTime.toLocalDate() == selectedDate
+    val tasksForSelectedDay =
+        if (selectedDate != null) {
+            tasks.filter { task ->
+                task.startTime.toLocalDate() == selectedDate
+            }
+        } else {
+            emptyList()
         }
-    } else {
-        emptyList()
-    }
-    val colors = DatePickerDefaults.colors(
-        selectedDayContainerColor = Color.Blue,
-        todayContentColor = Color.Red,
-        dayInSelectionRangeContainerColor = Color.LightGray
-    )
+    val colors =
+        DatePickerDefaults.colors(
+            selectedDayContainerColor = Color.Blue,
+            todayContentColor = Color.Red,
+            dayInSelectionRangeContainerColor = Color.LightGray,
+        )
     LaunchedEffect(Unit) {
         taskViewModel.loadTasks()
     }
 
     AppScaffold(
         navController = navController,
-        showFab = true // Hiển thị FAB
+        showFab = true, // Hiển thị FAB
     ) { paddingValues ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-        )
-        {
+        ) {
             DatePicker(
                 state = datePickerState,
                 title = { Text(text = "") },
                 showModeToggle = true,
-                colors = DatePickerDefaults.colors(
-                    selectedDayContainerColor = MaterialTheme.colorScheme.primary,
-                    todayContentColor = Color.Red,
-                ),
-                modifier = modifier
+                colors =
+                    DatePickerDefaults.colors(
+                        selectedDayContainerColor = MaterialTheme.colorScheme.primary,
+                        todayContentColor = Color.Red,
+                    ),
+                modifier = modifier,
             )
             Spacer(modifier = Modifier.height(15.dp))
             if (selectedDate != null) {
                 if (tasksForSelectedDay.isEmpty()) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         Icon(
                             imageVector = Icons.Default.DateRange,
                             contentDescription = null,
                             tint = Color.Gray,
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier.size(40.dp),
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "No schedule at this time",
                             fontSize = 20.sp,
                             color = Color.Gray,
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Center,
                         )
                     }
                 } else {
                     LazyColumn {
                         items(tasksForSelectedDay) { task ->
-                            TaskItem(
-                                task = task,
-                                onFavorite = {
-                                    taskViewModel.onEvent(TaskEvent.UpdateTask(task))
-                                },
-                                onCheckBox = {
-                                    taskViewModel.onEvent(TaskEvent.UpdateTask(task))
-                                },
-                                onClick = {
-                                    navController.navigate(Screen.EditTask.createRoute(task.id))
-                                }
-                            )
+                            TaskItem(task = task, onFavorite = {
+                                taskViewModel.onEvent(TaskEvent.UpdateTask(task))
+                            }, onCheckBox = {
+                                taskViewModel.onEvent(TaskEvent.UpdateTask(task))
+                            }, onClick = {
+                                navController.navigate(Screen.EditTask.createRoute(task.id))
+                            })
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
@@ -138,11 +138,5 @@ fun CalendarScreen(
     }
 }
 
-
-
 @SuppressLint("NewApi")
-fun Long.toLocalDate(): LocalDate {
-    return ofEpochMilli(this)
-        .atZone(ZoneId.systemDefault())
-        .toLocalDate()
-}
+fun Long.toLocalDate(): LocalDate = ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()

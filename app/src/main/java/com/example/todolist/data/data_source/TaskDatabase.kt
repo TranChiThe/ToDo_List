@@ -8,8 +8,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class TaskDatabase @Inject constructor(@ApplicationContext context: Context) {
-    val boxStore: BoxStore = MyObjectBox.builder()
-        .androidContext(context.applicationContext)
-        .build()
-}
+class TaskDatabase
+    @Inject
+    constructor(
+        @ApplicationContext context: Context,
+    ) {
+        val boxStore: BoxStore =
+            MyObjectBox.builder().androidContext(context.applicationContext).build()
+    }
