@@ -40,7 +40,9 @@ import com.example.todolist.presentation.screen.SearchScreen
 @Composable
 fun Navigation() {
     val navController = rememberNavController()
-    val topBarContent = remember { mutableStateOf<@Composable () -> Unit>({ Text("Task List") }) }
+    val topBarTitle = remember { mutableStateOf<@Composable () -> Unit>({ Text("Task List") }) }
+    val topBarActions = remember { mutableStateOf<@Composable () -> Unit>({}) }
+    val topBarNavigationIcon = remember { mutableStateOf<@Composable () -> Unit>({}) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val showFab = currentRoute !in listOf(Screen.AddTask.route, Screen.EditTask.route)
@@ -48,7 +50,9 @@ fun Navigation() {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { topBarContent.value() },
+                title = { topBarTitle.value() },
+                actions = { topBarActions.value() },
+                navigationIcon = { topBarNavigationIcon.value() },
                 colors = TopAppBarDefaults.topAppBarColors(Color.White),
             )
         },
@@ -101,34 +105,63 @@ fun Navigation() {
             },
         ) {
             composable(Screen.Home.route) {
-                topBarContent.value = { Text("Home") }
+                topBarTitle.value = { Text("Home") }
+                topBarActions.value = {}
+                topBarNavigationIcon.value = {}
                 HomeScreen(navController = navController)
             }
             composable(Screen.Search.route) {
+                topBarTitle.value = { Text("Search") }
+                topBarActions.value = {}
+                topBarNavigationIcon.value = {}
                 SearchScreen(
                     navController = navController,
-                    onTopBarContentChange = { content -> topBarContent.value = content },
+                    onTopBarContentChange = { content -> topBarTitle.value = content },
                 )
             }
             composable(Screen.Calendar.route) {
-                topBarContent.value = { Text("Calendar") }
+                topBarTitle.value = { Text("Calendar") }
+                topBarActions.value = {}
+                topBarNavigationIcon.value = {}
                 CalendarScreen(navController = navController)
             }
             composable(Screen.Favorite.route) {
-                topBarContent.value = { Text("Favorites") }
+                topBarTitle.value = { Text("Favorites") }
+                topBarActions.value = {}
+                topBarNavigationIcon.value = {}
                 FavoriteScreen(navController = navController)
             }
             composable(Screen.AddTask.route) {
-                topBarContent.value = { Text("Add Task") }
-                AddEditTaskScreen(navController = navController, taskId = null)
+                topBarTitle.value = { Text("Add Task") }
+                topBarActions.value = {}
+                topBarNavigationIcon.value = {}
+                AddEditTaskScreen(
+                    navController = navController,
+                    taskId = null,
+                    onTopBarContentChange = { titleContent, actionsContent, navIconContent ->
+                        topBarTitle.value = titleContent
+                        topBarActions.value = actionsContent
+                        topBarNavigationIcon.value = navIconContent
+                    },
+                )
             }
             composable(
                 route = Screen.EditTask.route,
                 arguments = listOf(navArgument("taskId") { type = NavType.LongType }),
             ) { backStackEntry ->
                 val taskId = backStackEntry.arguments?.getLong("taskId")
-                topBarContent.value = { Text("Edit Task") }
-                AddEditTaskScreen(navController = navController, taskId = taskId)
+                topBarTitle.value = { Text("Edit Task") }
+                topBarActions.value = {}
+                topBarNavigationIcon.value = {}
+                AddEditTaskScreen(
+                    navController = navController,
+                    taskId = taskId,
+                    onTopBarContentChange = { titleContent, actionsContent, navIconContent ->
+                        topBarTitle.value = titleContent
+                        topBarActions.value = actionsContent
+                        topBarNavigationIcon.value = navIconContent
+                    },
+                )
             }
         }
     }
