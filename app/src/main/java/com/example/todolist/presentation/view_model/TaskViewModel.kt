@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.todolist.domain.model.Task
 import com.example.todolist.domain.use_cases.TaskUseCases
+import com.example.todolist.presentation.util.TaskEvent
 import com.example.todolist.presentation.util.TaskEventBus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -33,20 +34,14 @@ class TaskViewModel
         }
 
         private fun observeTaskEvents() {
-            viewModelScope.launch {
-                TaskEventBus.eventFlow.collect {
-                    loadTasks()
-                }
-            }
+            viewModelScope.launch { TaskEventBus.eventFlow.collect { loadTasks() } }
         }
 
         fun loadTasks() {
             job?.cancel()
             job =
                 viewModelScope.launch {
-                    taskUseCases.getAllTask().collect { tasks ->
-                        _taskFlow.value = tasks
-                    }
+                    taskUseCases.getAllTask().collect { tasks -> _taskFlow.value = tasks }
                 }
         }
 
@@ -78,9 +73,7 @@ class TaskViewModel
                 }
 
                 is TaskEvent.RestoreTask -> {
-                    viewModelScope.launch {
-                        taskUseCases.addTask(deleteTask!!)
-                    }
+                    viewModelScope.launch { taskUseCases.addTask(deleteTask!!) }
                 }
             }
         }

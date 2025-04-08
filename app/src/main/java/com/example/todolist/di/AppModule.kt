@@ -28,31 +28,28 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    fun provideBoxStore(@ApplicationContext context: Context): BoxStore {
-        return MyObjectBox.builder().androidContext(context).build()
-    }
+    fun provideBoxStore(
+        @ApplicationContext context: Context,
+    ): BoxStore = MyObjectBox.builder().androidContext(context).build()
 
     @Provides
-    fun provideTaskBox(boxStore: BoxStore): Box<Task> {
-        return boxStore.boxFor(Task::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideTaskRepository(taskBox: Box<Task>): TaskRepository {
-        return TaskRepositoryImpl(taskBox)
-    }
+    fun provideTaskBox(boxStore: BoxStore): Box<Task> = boxStore.boxFor(Task::class.java)
 
     @Provides
     @Singleton
-    fun providerTaskUseCases(taskRepository: TaskRepository): TaskUseCases = TaskUseCases(
-        getAllTask = GetAllTask(taskRepository),
-        addTask = AddTask(taskRepository),
-        updateTask = UpdateTask(taskRepository),
-        deleteTask = DeleteTask(taskRepository),
-        getTaskById = GetTaskById(taskRepository),
-        deleteTaskById = DeleteTaskById(taskRepository),
-        searchTask = SearchTask(taskRepository),
-        getFavoriteTask = GetFavoriteTask(taskRepository)
-    )
+    fun provideTaskRepository(taskBox: Box<Task>): TaskRepository = TaskRepositoryImpl(taskBox)
+
+    @Provides
+    @Singleton
+    fun providerTaskUseCases(taskRepository: TaskRepository): TaskUseCases =
+        TaskUseCases(
+            getAllTask = GetAllTask(taskRepository),
+            addTask = AddTask(taskRepository),
+            updateTask = UpdateTask(taskRepository),
+            deleteTask = DeleteTask(taskRepository),
+            getTaskById = GetTaskById(taskRepository),
+            deleteTaskById = DeleteTaskById(taskRepository),
+            searchTask = SearchTask(taskRepository),
+            getFavoriteTask = GetFavoriteTask(taskRepository),
+        )
 }

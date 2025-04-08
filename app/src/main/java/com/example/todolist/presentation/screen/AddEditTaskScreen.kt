@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
@@ -24,12 +23,10 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -52,7 +49,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.todolist.presentation.navigation.AppTopBar
 import com.example.todolist.presentation.util.AddEditTaskEvent
 import com.example.todolist.presentation.util.LoadingOverlay
 import com.example.todolist.presentation.view_model.AddEditTaskViewModel
@@ -102,108 +98,108 @@ fun AddEditTaskScreen(
             viewModel.loadTaskById(taskId)
         }
     }
-    Scaffold(topBar = {
-        AppTopBar(title = if (taskId == null) "Add Task" else "Edit Task", onBackClick = {
-            viewModel.onEvent(AddEditTaskEvent.cancelTask)
-            navController.popBackStack()
-        })
-    }, floatingActionButton = {
-        FloatingActionButton(
-            onClick = {},
-            containerColor = MaterialTheme.colorScheme.primary,
-            content = {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = "Add",
-                    tint = Color.White,
-                )
-            },
-        )
-    }) { innerPadding ->
-        LoadingOverlay(isLoading = isLoading)
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            // Phần chọn thời gian
-            TimeSelectionSection(startTime = startTime, endTime = endTime, onStartTimeClick = {
+    LoadingOverlay(isLoading = isLoading)
+    Column(
+        modifier = Modifier.fillMaxSize().padding(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        // Phần chọn thời gian
+        TimeSelectionSection(
+            startTime = startTime,
+            endTime = endTime,
+            onStartTimeClick = {
                 showDatePicker = true
                 isStartTime = true
-            }, onEndTimeClick = {
+            },
+            onEndTimeClick = {
                 showDatePicker = true
                 isStartTime = false
-            })
+            },
+        )
 
-            // Phần nhập thông tin task
-            TaskInputSection(
-                taskTitle = title,
-                taskContent = content,
-                onTaskTitleChange = { viewModel.onEvent(AddEditTaskEvent.EnteredTitle(it)) },
-                onTaskContentChange = { viewModel.onEvent(AddEditTaskEvent.EnteredContent(it)) },
-                onCancel = {
-                    viewModel.onEvent(AddEditTaskEvent.cancelTask)
+        // Phần nhập thông tin task
+        TaskInputSection(
+            taskTitle = title,
+            taskContent = content,
+            onTaskTitleChange = { viewModel.onEvent(AddEditTaskEvent.EnteredTitle(it)) },
+            onTaskContentChange = { viewModel.onEvent(AddEditTaskEvent.EnteredContent(it)) },
+            onCancel = {
+                viewModel.onEvent(AddEditTaskEvent.cancelTask)
+                navController.popBackStack()
+            },
+            onSave = {
+                coroutineScope.launch(Dispatchers.IO) {
+                    isLoading = true
+                    delay(2000)
+                }
+                viewModel.onEvent(AddEditTaskEvent.saveTask)
+                isLoading = false
+                navController.popBackStack()
+            },
+            isFavorite = favorite,
+            onFavorite = { viewModel.onEvent(AddEditTaskEvent.ToggleFavorite) },
+            onDelete = {
+                taskId?.let {
+                    viewModel.deleteTaskById(it)
                     navController.popBackStack()
-                },
-                onSave = {
-                    coroutineScope.launch(Dispatchers.IO) {
-                        isLoading = true
-                        delay(2000)
-                    }
-                    viewModel.onEvent(AddEditTaskEvent.saveTask)
-                    isLoading = false
-                    navController.popBackStack()
-                },
-                isFavorite = favorite,
-                onFavorite = { viewModel.onEvent(AddEditTaskEvent.ToggleFavorite) },
-                onDelete = {
-                    taskId?.let {
-                        viewModel.deleteTaskById(it)
-                        navController.popBackStack()
-                    }
-                },
-            )
+                }
+            },
+        )
 
-            // Date Picker Dialog
-            if (showDatePicker) {
-                DatePickerDialog(onDismissRequest = { showDatePicker = false }, confirmButton = {
-                    TextButton(onClick = {
-                        showDatePicker = false
-                        showTimePicker = true
-                    }) { Text("Next") }
-                }, dismissButton = {
+        // Date Picker Dialog
+        if (showDatePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showDatePicker = false
+                            showTimePicker = true
+                        },
+                    ) {
+                        Text("Next")
+                    }
+                },
+                dismissButton = {
                     TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
-                }) {
-                    DatePicker(state = datePickerState)
-                }
+                },
+            ) {
+                DatePicker(state = datePickerState)
             }
+        }
 
-            // Time Picker Dialog
-            if (showTimePicker) {
-                DatePickerDialog(onDismissRequest = { showTimePicker = false }, confirmButton = {
-                    TextButton(onClick = {
-                        val calendar =
-                            Calendar.getInstance().apply {
-                                timeInMillis =
-                                    datePickerState.selectedDateMillis ?: System.currentTimeMillis()
-                                set(Calendar.HOUR_OF_DAY, timePickerState.hour)
-                                set(Calendar.MINUTE, timePickerState.minute)
+        // Time Picker Dialog
+        if (showTimePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showTimePicker = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val calendar =
+                                Calendar.getInstance().apply {
+                                    timeInMillis =
+                                        datePickerState.selectedDateMillis
+                                            ?: System.currentTimeMillis()
+                                    set(Calendar.HOUR_OF_DAY, timePickerState.hour)
+                                    set(Calendar.MINUTE, timePickerState.minute)
+                                }
+                            val selectedTime = calendar.timeInMillis
+                            if (isStartTime) {
+                                viewModel.onEvent(AddEditTaskEvent.SetStartTime(selectedTime))
+                            } else {
+                                viewModel.onEvent(AddEditTaskEvent.SetEndTime(selectedTime))
                             }
-                        val selectedTime = calendar.timeInMillis
-                        if (isStartTime) {
-                            viewModel.onEvent(AddEditTaskEvent.SetStartTime(selectedTime))
-                        } else {
-                            viewModel.onEvent(AddEditTaskEvent.SetEndTime(selectedTime))
-                        }
-                        showTimePicker = false
-                    }) { Text("OK") }
-                }, dismissButton = {
+                            showTimePicker = false
+                        },
+                    ) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
                     TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
-                }) {
-                    TimePicker(state = timePickerState)
-                }
+                },
+            ) {
+                TimePicker(state = timePickerState)
             }
         }
     }
@@ -217,17 +213,11 @@ fun TimeSelectionSection(
     onEndTimeClick: () -> Unit,
 ) {
     Card(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .shadow(4.dp, RoundedCornerShape(12.dp)),
+        modifier = Modifier.fillMaxWidth().shadow(4.dp, RoundedCornerShape(12.dp)),
         colors = CardDefaults.cardColors(containerColor = Color.White),
     ) {
         Column(
-            modifier =
-                Modifier
-                    .padding(12.dp)
-                    .fillMaxWidth(),
+            modifier = Modifier.padding(12.dp).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
@@ -242,12 +232,13 @@ fun TimeSelectionSection(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Start: ${
-                        SimpleDateFormat(
-                            "dd/MM/yyyy HH:mm",
-                            Locale.getDefault(),
-                        ).format(startTime)
-                    }",
+                    text =
+                        "Start: ${
+                            SimpleDateFormat(
+                                "dd/MM/yyyy HH:mm",
+                                Locale.getDefault(),
+                            ).format(startTime)
+                        }",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 IconButton(onClick = onStartTimeClick) {
@@ -265,11 +256,12 @@ fun TimeSelectionSection(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "End: ${
-                        SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(
-                            endTime,
-                        )
-                    }",
+                    text =
+                        "End: ${
+                            SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(
+                                endTime,
+                            )
+                        }",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 IconButton(onClick = onEndTimeClick) {
@@ -298,17 +290,11 @@ fun TaskInputSection(
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     Card(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .shadow(4.dp, RoundedCornerShape(12.dp)),
+        modifier = Modifier.fillMaxWidth().shadow(4.dp, RoundedCornerShape(12.dp)),
         colors = CardDefaults.cardColors(containerColor = Color.White),
     ) {
         Column(
-            modifier =
-                Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
+            modifier = Modifier.padding(10.dp).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Row(
@@ -324,7 +310,12 @@ fun TaskInputSection(
                 Row {
                     IconButton(onClick = { onFavorite() }) {
                         Icon(
-                            imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                            imageVector =
+                                if (isFavorite) {
+                                    Icons.Filled.Favorite
+                                } else {
+                                    Icons.Filled.FavoriteBorder
+                                },
                             contentDescription = "Favorite",
                             tint = if (isFavorite) Color.Red else Color.Gray,
                         )
@@ -344,10 +335,12 @@ fun TaskInputSection(
                             title = { Text("Confirm deletion") },
                             text = { Text("Are you sure you want to delete this task?") },
                             confirmButton = {
-                                TextButton(onClick = {
-                                    showDeleteDialog = false
-                                    onDelete()
-                                }) {
+                                TextButton(
+                                    onClick = {
+                                        showDeleteDialog = false
+                                        onDelete()
+                                    },
+                                ) {
                                     Text("Delete", color = Color.Red)
                                 }
                             },
@@ -373,10 +366,7 @@ fun TaskInputSection(
             OutlinedTextField(
                 value = taskContent,
                 onValueChange = onTaskContentChange,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(120.dp),
+                modifier = Modifier.fillMaxWidth().height(120.dp),
                 label = { Text("Task Content") },
                 placeholder = { Text("Enter content") },
                 maxLines = 5,
@@ -395,7 +385,10 @@ fun TaskInputSection(
                 Button(
                     onClick = onSave,
                     enabled = taskTitle.isNotBlank(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                        ),
                 ) {
                     Text("Save", color = Color.White)
                 }

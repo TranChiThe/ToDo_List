@@ -57,11 +57,12 @@ fun TaskItem(
     var isChecked by remember { mutableStateOf(task.status == "Done") }
     val maxLength = 18
     val isDone by remember { derivedStateOf { task.status == "Done" } }
-    val displayTitle = if (task.title.length > maxLength) {
-        "${task.title.substring(0, maxLength)}..."
-    } else {
-        task.title
-    }
+    val displayTitle =
+        if (task.title.length > maxLength) {
+            "${task.title.substring(0, maxLength)}..."
+        } else {
+            task.title
+        }
     var isFavorite by remember(task.id) { mutableStateOf(task.favorite) }
     val coroutineScope = rememberCoroutineScope()
 
@@ -73,69 +74,77 @@ fun TaskItem(
     }
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp)
-            .shadow(6.dp, RoundedCornerShape(12.dp))
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(
-            containerColor = if (isDone) Color(0xFFF0F0F0) else Color.White
-        )
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 16.dp)
+                .shadow(6.dp, RoundedCornerShape(12.dp))
+                .clickable { onClick() },
+        colors =
+            CardDefaults.cardColors(
+                containerColor = if (isDone) Color(0xFFF0F0F0) else Color.White,
+            ),
     ) {
         Row(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .padding(12.dp)
+                    .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             // Checkbox và Title
             Row(
-                verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f),
             ) {
                 Column {
                     Checkbox(
-                        checked = isChecked, onCheckedChange = {
+                        checked = isChecked,
+                        onCheckedChange = {
                             isChecked = it
                             val newStatus = if (isChecked) "Done" else "Pending"
                             task.status = newStatus
                             task.updateAt = System.currentTimeMillis()
                             onCheckBox()
-                        }, colors = CheckboxDefaults.colors(
-                            checkedColor = MaterialTheme.colorScheme.primary,
-                            uncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
+                        },
+                        colors =
+                            CheckboxDefaults.colors(
+                                checkedColor = MaterialTheme.colorScheme.primary,
+                                uncheckedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            ),
                     )
                 }
                 Column(
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp),
                 ) {
                     Text(
                         text = displayTitle,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontSize = 18.sp,
-                            fontWeight = if (isChecked) FontWeight.Normal else FontWeight.Medium
-                        ),
+                        style =
+                            MaterialTheme.typography.bodyLarge.copy(
+                                fontSize = 18.sp,
+                                fontWeight = if (isChecked) FontWeight.Normal else FontWeight.Medium,
+                            ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         textDecoration = if (isChecked) TextDecoration.LineThrough else null,
-                        color = if (isChecked) Color.Gray.copy(alpha = 0.7f) else Color.Black
+                        color = if (isChecked) Color.Gray.copy(alpha = 0.7f) else Color.Black,
                     )
                     Row(
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
                             imageVector = Icons.Default.DateRange,
                             contentDescription = "Start Time",
                             tint = Color.Gray,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = formatTimestamp(task.startTime),
                             style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
                             color = Color.Gray,
-                            modifier = Modifier.padding(top = 2.dp)
+                            modifier = Modifier.padding(top = 2.dp),
                         )
                         Spacer(modifier = Modifier.width(4.dp))
 
@@ -143,23 +152,28 @@ fun TaskItem(
                             imageVector = Icons.Default.DateRange,
                             contentDescription = "End Time",
                             tint = if (isExpired) Color.Red else Color(0xFFFF9900),
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = formatTimestamp(task.endTime),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 12.sp, color = if (isExpired) Color.Red else Color.Gray
-                            ),
-                            modifier = Modifier.padding(top = 2.dp)
+                            style =
+                                MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 12.sp,
+                                    color = if (isExpired) Color.Red else Color.Gray,
+                                ),
+                            modifier = Modifier.padding(top = 2.dp),
                         )
                         if (isExpired) {
                             Text(
-                                text = "Expired", style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.Red
-                                ), modifier = Modifier.padding(start = 4.dp, top = 2.dp)
+                                text = "Expired",
+                                style =
+                                    MaterialTheme.typography.bodySmall.copy(
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.Red,
+                                    ),
+                                modifier = Modifier.padding(start = 4.dp, top = 2.dp),
                             )
                         }
                     }
@@ -168,15 +182,16 @@ fun TaskItem(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
-                    .width(IntrinsicSize.Max)
-                    .padding(end = 8.dp)
+                modifier =
+                    Modifier
+                        .width(IntrinsicSize.Max)
+                        .padding(end = 8.dp),
             ) {
                 Text(
                     text = if (isChecked) "Done" else "Pending",
                     style = MaterialTheme.typography.labelMedium.copy(fontSize = 14.sp),
                     color = if (isChecked) Color(0xFF4CAF50) else Color(0xFFF44336),
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
                 )
                 IconButton(
                     onClick = {
@@ -185,12 +200,13 @@ fun TaskItem(
                         coroutineScope.launch {
                             onFavorite()
                         }
-                    }, modifier = Modifier.size(36.dp)
+                    },
+                    modifier = Modifier.size(36.dp),
                 ) {
                     Icon(
                         imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         contentDescription = "Favorite",
-                        tint = if (isFavorite) MaterialTheme.colorScheme.error else Color.Gray
+                        tint = if (isFavorite) MaterialTheme.colorScheme.error else Color.Gray,
                     )
                 }
             }
