@@ -32,6 +32,7 @@ import androidx.navigation.NavHostController
 import com.example.todolist.presentation.navigation.Screen
 import com.example.todolist.presentation.task.TaskItem
 import com.example.todolist.presentation.util.TaskEvent
+import com.example.todolist.presentation.view_model.AddEditTaskViewModel
 import com.example.todolist.presentation.view_model.TaskViewModel
 import java.time.Instant.ofEpochMilli
 import java.time.LocalDate
@@ -45,6 +46,7 @@ fun CalendarScreen(
     modifier: Modifier = Modifier,
 ) {
     val tasks by taskViewModel.taskFlow.collectAsState(initial = emptyList())
+    val viewModel: AddEditTaskViewModel = hiltViewModel()
     val datePickerState =
         rememberDatePickerState(
             initialSelectedDateMillis = System.currentTimeMillis(),
@@ -59,7 +61,7 @@ fun CalendarScreen(
         }
     LaunchedEffect(Unit) { taskViewModel.loadTasks() }
 
-    Column {
+    Column(modifier = Modifier.fillMaxSize()) {
         DatePicker(
             state = datePickerState,
             title = { Text(text = "") },
@@ -101,6 +103,7 @@ fun CalendarScreen(
                             onClick = {
                                 navController.navigate(Screen.EditTask.createRoute(task.id))
                             },
+                            onDelete = { viewModel.deleteTaskById(task.id) },
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }

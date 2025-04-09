@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.todolist"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -34,18 +34,15 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
-    buildFeatures {
-        compose = true
-    }
+    kotlinOptions { jvmTarget = "11" }
+    buildFeatures { compose = true }
 }
 
 dependencies {
-// Hilt
+    // Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")
-//    implementation(libs.generativeai)
+    implementation(libs.androidx.compose.material)
+    //    implementation(libs.generativeai)
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation("androidx.hilt:hilt-work:1.0.0")
     kapt("androidx.hilt:hilt-compiler:1.0.0")

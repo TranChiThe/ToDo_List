@@ -1,6 +1,8 @@
 package com.example.todolist.presentation.screen
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +29,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,6 +39,7 @@ import androidx.navigation.NavHostController
 import com.example.todolist.presentation.navigation.Screen
 import com.example.todolist.presentation.task.TaskItem
 import com.example.todolist.presentation.util.TaskEvent
+import com.example.todolist.presentation.view_model.AddEditTaskViewModel
 import com.example.todolist.presentation.view_model.SearchTaskViewModel
 import com.example.todolist.presentation.view_model.TaskViewModel
 import kotlinx.coroutines.Dispatchers
@@ -51,7 +56,10 @@ fun SearchScreen(
     var text by remember { mutableStateOf("") }
     val searchResults = searchTaskViewModel.searchResults.value
     val taskViewModel: TaskViewModel = hiltViewModel()
+    val viewModel: AddEditTaskViewModel = hiltViewModel()
     val coroutineScope = rememberCoroutineScope()
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
     onTopBarContentChange {
         Column(
@@ -75,7 +83,15 @@ fun SearchScreen(
         }
     }
     Column(
-        modifier = Modifier.fillMaxSize().padding(top = 16.dp),
+        modifier =
+            Modifier.fillMaxSize().padding(top = 16.dp).clickable(
+                onClick = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                },
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+            ),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         if (text.isNotEmpty()) {
@@ -93,6 +109,7 @@ fun SearchScreen(
                             },
                             onFavorite = { taskViewModel.onEvent(TaskEvent.UpdateTask(task)) },
                             onCheckBox = { taskViewModel.onEvent(TaskEvent.UpdateTask(task)) },
+                            onDelete = { viewModel.deleteTaskById(task.id) },
                         )
                     }
                 }

@@ -30,6 +30,7 @@ import androidx.navigation.NavHostController
 import com.example.todolist.presentation.navigation.Screen
 import com.example.todolist.presentation.task.TaskItem
 import com.example.todolist.presentation.util.TaskEvent
+import com.example.todolist.presentation.view_model.AddEditTaskViewModel
 import com.example.todolist.presentation.view_model.TaskViewModel
 
 @Composable
@@ -39,6 +40,7 @@ fun FavoriteScreen(
     taskViewModel: TaskViewModel = hiltViewModel(),
 ) {
     val tasks by taskViewModel.taskFlow.collectAsState(initial = emptyList())
+    val viewModel: AddEditTaskViewModel = hiltViewModel()
     LaunchedEffect(Unit) { taskViewModel.getFavoriteTask(true) }
     Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
         if (tasks.isEmpty()) {
@@ -85,6 +87,10 @@ fun FavoriteScreen(
                                 },
                                 onFavorite = { taskViewModel.onEvent(TaskEvent.UpdateTask(task)) },
                                 onCheckBox = { taskViewModel.onEvent(TaskEvent.UpdateTask(task)) },
+                                onDelete = {
+                                    viewModel.deleteTaskById(task.id)
+                                    taskViewModel.getFavoriteTask(true)
+                                },
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }

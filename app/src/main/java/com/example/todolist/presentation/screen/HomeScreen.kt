@@ -1,7 +1,6 @@
 package com.example.todolist.presentation.screen
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,6 +33,7 @@ import com.example.todolist.domain.model.Task
 import com.example.todolist.presentation.navigation.Screen
 import com.example.todolist.presentation.task.TaskItem
 import com.example.todolist.presentation.util.TaskEvent
+import com.example.todolist.presentation.view_model.AddEditTaskViewModel
 import com.example.todolist.presentation.view_model.TaskViewModel
 import java.util.Calendar
 
@@ -45,6 +45,7 @@ fun HomeScreen(
     navController: NavHostController,
 ) {
     val tasks by taskViewModel.taskFlow.collectAsState(initial = emptyList())
+    val viewModel: AddEditTaskViewModel = hiltViewModel()
     val context = LocalContext.current
 
     LaunchedEffect(Unit) { taskViewModel.loadTasks() }
@@ -93,14 +94,9 @@ fun HomeScreen(
                                 },
                                 onFavorite = {
                                     taskViewModel.onEvent(TaskEvent.UpdateTask(task))
-                                    Toast
-                                        .makeText(
-                                            context,
-                                            "Added to favorites",
-                                            Toast.LENGTH_SHORT,
-                                        ).show()
                                 },
                                 onCheckBox = { taskViewModel.onEvent(TaskEvent.UpdateTask(task)) },
+                                onDelete = { viewModel.deleteTaskById(task.id) },
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }

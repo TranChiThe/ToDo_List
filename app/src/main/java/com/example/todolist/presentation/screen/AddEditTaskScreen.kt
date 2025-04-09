@@ -1,5 +1,7 @@
 package com.example.todolist.presentation.screen
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,12 +46,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.todolist.presentation.util.AddEditTaskEvent
-import com.example.todolist.presentation.util.LoadingOverlay
 import com.example.todolist.presentation.view_model.AddEditTaskViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -73,6 +76,8 @@ fun AddEditTaskScreen(
     val startTime = viewModel.startTime.value
     val endTime = viewModel.endTime.value
     val favorite = viewModel.favorite.value
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
 
     // State cho Date/Time Picker
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = startTime)
@@ -126,103 +131,107 @@ fun AddEditTaskScreen(
             viewModel.loadTaskById(taskId)
         }
     }
-    Column(modifier = Modifier.fillMaxSize()) {
-        LoadingOverlay(isLoading = isLoading)
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-                    .weight(1f)
-                    .verticalScroll(scrollState)
-                    .imePadding(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            TimeSelectionSection(
-                startTime = startTime,
-                endTime = endTime,
-                onStartTimeClick = {
-                    showDatePicker = true
-                    isStartTime = true
-                },
-                onEndTimeClick = {
-                    showDatePicker = true
-                    isStartTime = false
-                },
-            )
 
-            TaskInputSection(
-                taskTitle = title,
-                taskContent = content,
-                onTaskTitleChange = { viewModel.onEvent(AddEditTaskEvent.EnteredTitle(it)) },
-                onTaskContentChange = { viewModel.onEvent(AddEditTaskEvent.EnteredContent(it)) },
-                onCancel = {},
-                onSave = {},
-                isFavorite = favorite,
-                onFavorite = { viewModel.onEvent(AddEditTaskEvent.ToggleFavorite) },
-                onDelete = {
-                    taskId?.let {
-                        viewModel.deleteTaskById(it)
-                        navController.popBackStack()
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(scrollState)
+                .imePadding()
+                .clickable(onClick = {
+                    keyboardController?.hide()
+                    focusManager.clearFocus()
+                }, indication = null, interactionSource = remember { MutableInteractionSource() }),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        TimeSelectionSection(
+            startTime = startTime,
+            endTime = endTime,
+            onStartTimeClick = {
+                showDatePicker = true
+                isStartTime = true
+                keyboardController?.hide()
+                focusManager.clearFocus()
+            },
+            onEndTimeClick = {
+                showDatePicker = true
+                isStartTime = false
+                keyboardController?.hide()
+                focusManager.clearFocus()
+            },
+        )
+
+        TaskInputSection(
+            taskTitle = title,
+            taskContent = content,
+            onTaskTitleChange = { viewModel.onEvent(AddEditTaskEvent.EnteredTitle(it)) },
+            onTaskContentChange = { viewModel.onEvent(AddEditTaskEvent.EnteredContent(it)) },
+            onCancel = {},
+            onSave = {},
+            isFavorite = favorite,
+            onFavorite = { viewModel.onEvent(AddEditTaskEvent.ToggleFavorite) },
+            onDelete = {
+                taskId?.let {
+                    viewModel.deleteTaskById(it)
+                    navController.popBackStack()
+                }
+            },
+        )
+
+        // Date Picker Dialog
+        if (showDatePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showDatePicker = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showDatePicker = false
+                            showTimePicker = true
+                        },
+                    ) {
+                        Text("Next")
                     }
                 },
-            )
-
-            // Date Picker Dialog
-            if (showDatePicker) {
-                DatePickerDialog(
-                    onDismissRequest = { showDatePicker = false },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                showDatePicker = false
-                                showTimePicker = true
-                            },
-                        ) {
-                            Text("Next")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
-                    },
-                ) {
-                    DatePicker(state = datePickerState)
-                }
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) { Text("Cancel") }
+                },
+            ) {
+                DatePicker(state = datePickerState)
             }
+        }
 
-            // Time Picker Dialog
-            if (showTimePicker) {
-                DatePickerDialog(
-                    onDismissRequest = { showTimePicker = false },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                val calendar =
-                                    Calendar.getInstance().apply {
-                                        timeInMillis =
-                                            datePickerState.selectedDateMillis
-                                                ?: System.currentTimeMillis()
-                                        set(Calendar.HOUR_OF_DAY, timePickerState.hour)
-                                        set(Calendar.MINUTE, timePickerState.minute)
-                                    }
-                                val selectedTime = calendar.timeInMillis
-                                if (isStartTime) {
-                                    viewModel.onEvent(AddEditTaskEvent.SetStartTime(selectedTime))
-                                } else {
-                                    viewModel.onEvent(AddEditTaskEvent.SetEndTime(selectedTime))
+        // Time Picker Dialog
+        if (showTimePicker) {
+            DatePickerDialog(
+                onDismissRequest = { showTimePicker = false },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val calendar =
+                                Calendar.getInstance().apply {
+                                    timeInMillis =
+                                        datePickerState.selectedDateMillis ?: System.currentTimeMillis()
+                                    set(Calendar.HOUR_OF_DAY, timePickerState.hour)
+                                    set(Calendar.MINUTE, timePickerState.minute)
                                 }
-                                showTimePicker = false
-                            },
-                        ) {
-                            Text("OK")
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
-                    },
-                ) {
-                    TimePicker(state = timePickerState)
-                }
+                            val selectedTime = calendar.timeInMillis
+                            if (isStartTime) {
+                                viewModel.onEvent(AddEditTaskEvent.SetStartTime(selectedTime))
+                            } else {
+                                viewModel.onEvent(AddEditTaskEvent.SetEndTime(selectedTime))
+                            }
+                            showTimePicker = false
+                        },
+                    ) {
+                        Text("OK")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showTimePicker = false }) { Text("Cancel") }
+                },
+            ) {
+                TimePicker(state = timePickerState)
             }
         }
     }
@@ -252,13 +261,12 @@ fun TimeSelectionSection(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text =
-                        "Start: ${
-                            SimpleDateFormat(
-                                "dd/MM/yyyy HH:mm",
-                                Locale.getDefault(),
-                            ).format(startTime)
-                        }",
+                    text = "Start: ${
+                        SimpleDateFormat(
+                            "dd/MM/yyyy HH:mm",
+                            Locale.getDefault(),
+                        ).format(startTime)
+                    }",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 IconButton(onClick = onStartTimeClick) {
@@ -276,12 +284,11 @@ fun TimeSelectionSection(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text =
-                        "End: ${
-                            SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(
-                                endTime,
-                            )
-                        }",
+                    text = "End: ${
+                        SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(
+                            endTime,
+                        )
+                    }",
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 IconButton(onClick = onEndTimeClick) {

@@ -101,6 +101,7 @@ class AddEditTaskViewModel
         fun deleteTaskById(id: Long) {
             viewModelScope.launch {
                 taskUseCases.deleteTaskById(id)
+                taskUseCases.getFavoriteTask(true)
                 TaskEventBus.sendEvent()
             }
         }
